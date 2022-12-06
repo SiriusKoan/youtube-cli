@@ -2,19 +2,29 @@ import io
 import threading
 from time import sleep
 import sys
+import os
 from pydub import AudioSegment
 from pydub.playback import play
 import pytube
 
+N = os.get_terminal_size().columns
+RESET = "\033[0m"
+PROGRESS_BAR_BG = "\033[44m"
+TITLE_FG = "\033[91m"
+AUTHOR_FG = "\033[93m"
+
 
 def time_count(length):
     cur = 0
-    N = 100
     while True:
         # progress bar
         sys.stdout.write(
-            "\r[%-100s] %02d:%02d"
-            % ("=" * int(cur // (length / N) + 1), cur // 60, cur % 60)
+            f"\r{PROGRESS_BAR_BG}[%s]{RESET} %02d:%02d"
+            % (
+                ("=" * int(cur // (length / (N - 10)) + 1)).ljust(N - 10),
+                cur // 60,
+                cur % 60,
+            )
         )
         sys.stdout.flush()
         cur += 1
@@ -38,9 +48,13 @@ stream = streams[0]
 
 # print song info
 print()
-print(audio.title)
-print("Length: %02d:%02d" % (audio.length // 60, audio.length % 60))
-print(f"Published at {audio.publish_date.strftime('%Y-%M-%d')} by {audio.author}")
+print(f"{TITLE_FG}{audio.title}{RESET}".center(N, " "))
+print(("Length: %02d:%02d" % (audio.length // 60, audio.length % 60)).center(N, " "))
+print(
+    f"Published at {audio.publish_date.strftime('%Y-%m-%d')} by {AUTHOR_FG}{audio.author}{RESET}".center(
+        N, " "
+    )
+)
 
 data = ""
 with io.BytesIO() as buffer:
