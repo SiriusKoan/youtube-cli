@@ -7,10 +7,15 @@ from pydub.playback import play
 import pytube
 
 
-def time_count():
+def time_count(length):
     cur = 0
+    N = 100
     while True:
-        sys.stdout.write("\r%02d:%02d" % (cur // 60, cur % 60))
+        # progress bar
+        sys.stdout.write(
+            "\r[%-100s] %02d:%02d"
+            % ("=" * int(cur // (length / N) + 1), cur // 60, cur % 60)
+        )
         sys.stdout.flush()
         cur += 1
         sleep(1)
@@ -45,6 +50,6 @@ with io.BytesIO() as buffer:
 song = AudioSegment.from_file(io.BytesIO(data), format="mp4")
 
 print("Start playing...")
-t = threading.Thread(target=time_count, daemon=True)
+t = threading.Thread(target=time_count, daemon=True, args=(audio.length,))
 t.start()
 play(song)
